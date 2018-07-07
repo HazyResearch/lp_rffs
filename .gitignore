@@ -1,0 +1,22 @@
+# First, ignore everything
+*
+# Now, whitelist anything that's a directory
+!*/
+# And all the file types you're interested in.
+!*.tex
+!*.jpg
+!*.sty
+!*.bib
+!*.bst
+!.gitignore
+!*.docx
+!*.txt
+!*.xlsx
+!*.mat
+!*.eps
+!*.m
+!*.pptx
+!*.png
+!*.zip
+!*.py
+!paper/figures/*.pdf
