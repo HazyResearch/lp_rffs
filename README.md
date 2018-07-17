@@ -6,7 +6,7 @@
 * [Setup instructions](#setup-instructions)
 * [Command guidelines](#command-guidelines)
 * [Citation](#citation)
-* [Acknowledgement](#acknowledgement)
+* [Acknowledgements](#acknowledgement)
 
 ## Setup instructions
 * Install [PyTorch](https://pytorch.org/). Our implementation is tested under PyTorch 0.3.1.
@@ -93,7 +93,7 @@ unzip LP-RFFs-Data.zip
 
   We present the commands for several configurations. For more examples please browse to [example_runs.sh](./example_runs.sh).
 
-  * Closed-form kernel ridge regression using 4 bit LP-RFFs on a CPU.
+  * Closed-form kernel ridge regression using 4 bit LP-RFFs on a CPU:
   ```
   python run_model.py \
     --approx_type=cir_rff --n_feat=1000  --n_bit_feat=4  \
@@ -101,7 +101,7 @@ unzip LP-RFFs-Data.zip
     --data_path=../LP-RFFs-Data/census --save_path=./tmp --collect_sample_metrics
   ```
 
-  * SGD-based training for kernel logistic regression using 8 bit LP-RFFs on a GPU.
+  * SGD-based training for kernel logistic regression using 8 bit LP-RFFs on a GPU:
   ```
   python run_model.py \
     --approx_type=cir_rff --n_feat=5000 --n_bit_feat=8 \
@@ -111,7 +111,7 @@ unzip LP-RFFs-Data.zip
     --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --n_sample=20000 --cuda
   ```
 
-  * Low-precision 8-bit LM-HALP (SVRG) training for kernel logistic regression using 8 bit LP-RFFs on a GPU.
+  * Low-precision 8-bit LM-HALP (SVRG) training for kernel logistic regression using 8 bit LP-RFFs on a GPU:
   ```
   python run_model.py \
     --approx_type=cir_rff --n_bit_feat=8 --n_feat=10000 \
@@ -127,5 +127,5 @@ If you use this repository for your work, please cite our paper:
 ArXiv entry
 ```
 
-## Acknowledgement
+## Acknowledgements
 We thank Fred Sala, Virginia Smith, Will Hamilton, Paroma Varma, Alex Ratner, Sen Wu and Megan Leszczynski for their helpful discussions and feedback.
