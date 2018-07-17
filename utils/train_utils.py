@@ -42,7 +42,7 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 return cost
             loss = optimizer.step(closure)
             train_loss.append(loss[0].data.cpu().numpy() )
-        elif (args.opt == "lm_halp") or (args.opt == "lm_bit_center_sgd"):
+        elif (args.opt == "lm_halp_svrg") or (args.opt == "lm_halp_sgd"):
             # We need to add this function to models when we want to use SVRG
             def closure(data=X, target=Y, feat=None):
                 if use_cuda:

@@ -178,7 +178,7 @@ if __name__ == "__main__":
             min_val = -np.sqrt(2.0/float(n_quantized_rff) )
             max_val = np.sqrt(2.0/float(n_quantized_rff) )
             quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
-                rand_seed=args.random_seed, use_cuda=use_cuda, for_lm_halp=( (args.opt == "lm_halp") or (args.opt == "lm_bit_center_sgd")  ) )
+                rand_seed=args.random_seed, use_cuda=use_cuda, for_lm_halp=( (args.opt == "lm_halp_svrg") or (args.opt == "lm_halp_sgd")  ) )
             print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
         elif args.do_fp_feat == True:
             print("fp circulant rff feature mode")
@@ -232,16 +232,16 @@ if __name__ == "__main__":
                 data_loader=train_loader, mu=args.opt_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
             print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
                 optimizer._bits, optimizer._biased)
-        elif args.opt == "lm_halp":
-            print("using lm halp optimizer")
+        elif args.opt == "lm_halp_svrg":
+            print("using lm halp svrg optimizer")
             optimizer = halp.optim.LMHALP(model.parameters(), lr=args.learning_rate, 
                 T=int(args.opt_epoch_T * X_train.size(0) / float(args.minibatch) ), 
                 data_loader=train_loader, mu=args.opt_mu, bits=args.n_bit_model, 
                 weight_decay=args.l2_reg, data_scale=quantizer.scale)
             print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
                 optimizer._bits, optimizer._biased)
-        elif args.opt == "lm_bit_center_sgd":
-            print("using lm bit center sgd optimizer")
+        elif args.opt == "lm_halp_sgd":
+            print("using lm halp sgd optimizer")
             optimizer = halp.optim.BitCenterLMSGD(model.parameters(), lr=args.learning_rate,
                 T=int(args.opt_epoch_T * X_train.size(0) / float(args.minibatch) ),
                 data_loader=train_loader, mu=args.opt_mu, bits=args.n_bit_model,
