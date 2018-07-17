@@ -35,26 +35,26 @@ unzip LP-RFFs-Data.zip
 
   LP-RFFs currently supports:
   * FP-RFFs (--approx_type=rff --do_fp_feat)
-  * circulant FP-RFFs (--approx_type=cir_rff --do_fp_feat)
+  * Circulant FP-RFFs (--approx_type=cir_rff --do_fp_feat)
   * FP-Nystrom (--approx_type=nystrom --do_fp_feat)
-  * ensemble FP-Nystrom (--approx_type=ensemble_nystrom --do_fp_feat --n_ensemble_nystrom=<# of learners of ensemble Nystrom>)
+  * Ensemble FP-Nystrom (--approx_type=ensemble_nystrom --do_fp_feat --n_ensemble_nystrom=<# of learners of ensemble Nystrom>)
   * LP-RFFs (--approx_type=cir_rff --n_bit_feat=<# of bits>)
   * LP-Nystrom (--approx_type=ensemble_nystrom --n_bit_feat=<# of bits> --n_ensemble_nystrom=1)
-  * ensemble LP-Nystrom (--approx_type=ensemble_nystrom --n_bit_feat=<# of bits> --n_ensemble_nystrom=<# of learners of ensemble Nystrom>).
+  * Ensemble LP-Nystrom (--approx_type=ensemble_nystrom --n_bit_feat=<# of bits> --n_ensemble_nystrom=<# of learners of ensemble Nystrom>).
   ```
   
   * Specify training approach
   ```
   LP-RFFs currently supports training the following types of models:
-  * closed-form kernel ridge regression: 
+  * Closed-form kernel ridge regression:
     --model=ridge_regression --closed_form_sol 
-  * mini-batch based iterative training for kernel ridge regression: 
+  * Mini-batch based iterative training for kernel ridge regression:
     --model=ridge_regression --opt=type of the optimizer
-  * mini-batch based iterative training for logistic regression: 
+  * Mini-batch based iterative training for logistic regression:
     --model=logistic_regression --opt=type of the optimizer
     
   LP-RFFs can use the following optimizers for mini-batch based iterative training:
-  * plain SGD (full precision training):
+  * Plain SGD (full precision training):
     --opt=sgd
   * LM-HALP SVRG (low precision training):
     --opt=lm_halp_svrg --n_bit_model=<# of bit for model parameter during training> \
@@ -93,7 +93,7 @@ unzip LP-RFFs-Data.zip
 
   We present the commands for several configurations. For more examples please browse to [example_runs.sh](./example_runs.sh).
 
-  * closed-form kernel ridge regression using 4 bit LP-RFFs on a CPU.
+  * Closed-form kernel ridge regression using 4 bit LP-RFFs on a CPU.
   ```
   python run_model.py \
     --approx_type=cir_rff --n_feat=1000  --n_bit_feat=4  \
