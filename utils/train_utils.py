@@ -210,12 +210,13 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
     # spectrum = get_matrix_spectrum(kernel_mat_approx)
     # spectrum_exact = get_matrix_spectrum(kernel_mat)
     print("calculation delta with lambda = ", l2_reg)
-    delta = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
+    delta_right, delta_left = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
        kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
     spectrum = None
     spectrum_exact = None
     metric_dict = {"F_norm_error": float(F_norm_error),
-                  "Delta": float(delta),
+                  "Delta_left": float(delta_left),
+                  "Delta_right": float(delta_right),
                   "spectral_norm_error": float(spectral_norm_error) }
     print(metric_dict)
     if is_cuda_tensor:
