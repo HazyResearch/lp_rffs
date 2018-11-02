@@ -124,7 +124,12 @@ unzip LP-RFFs-Data.zip
 ## Citation
 If you use this repository for your work, please cite our paper:
 ```
-ArXiv entry
+@article{zhangmay2018lprffs,
+  title={Low-Precision Random Fourier Features for Memory-Constrained Kernel Approximation},
+  author={Zhang, Jian and May, Avner and Dao, Tri and R{\'e}, Christopher},
+  journal={arXiv preprint arXiv:1811.00155},
+  year={2018}
+}
 ```
 
 ## Acknowledgements
