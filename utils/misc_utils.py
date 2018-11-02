@@ -31,7 +31,6 @@ def delta_approximation(K, K_tilde, lambda_=1e-3):
     assert np.allclose(K, K.T) and np.allclose(K_tilde, K_tilde.T), "Kernel matrix must be symmetric"
     # Compute eigen-decomposition of K + lambda_ I, of the form V @ np.diag(sigma) @ V.T
     sigma, V = np.linalg.eigh(K)
-    # due to numerical precision, the smallest values of sigma can be negative value with very small magnitude in some cases
     #assert np.all(sigma >= 0), "Kernel matrix K must be positive semidefinite"
     sigma += lambda_
     # Whitened K_tilde: np.diag(1 / np.sqrt(sigma)) @ V.T @ K_tilde @ V @ np.diag(1 / np.sqrt(sigma))
@@ -41,7 +40,7 @@ def delta_approximation(K, K_tilde, lambda_=1e-3):
     lambda_min = sigma_final[0]
     lambda_max = sigma_final[-1]
     assert lambda_max >= lambda_min
-    return max(lambda_max, -lambda_min/(1.0 + lambda_min) )
+    return lambda_max, -lambda_min
 
 
 class Args(object):
