@@ -10,10 +10,14 @@ if sys.version_info[0] < 3:
 else:
     import _pickle as cp
 from copy import deepcopy
-sys.path.append("./models")
-sys.path.append("./kernels")
-sys.path.append("./utils")
-sys.path.append("./..")
+# sys.path.append("./models")
+# sys.path.append("./kernels")
+# sys.path.append("./utils")
+# sys.path.append("./..")
+sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/models"))
+sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/kernels"))
+sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/utils"))
+# sys.path.append("./..")
 from gaussian_exact import GaussianKernel
 from rff import RFF
 from circulant_rff import  CirculantRFF
@@ -24,14 +28,15 @@ from logistic_regression import LogisticRegression
 from ridge_regression import RidgeRegression
 from kernel_regressor import KernelRidgeRegression
 from data_loader import load_data
-import halp
-import halp.optim
-import halp.quantize
+# import halp
+# import halp.optim
+# import halp.quantize
 from train_utils import train, evaluate, ProgressMonitor
 from train_utils import get_sample_kernel_metrics, get_sample_kernel_F_norm, sample_data
 # imports for fixed design runs
 from misc_utils import expected_loss
 from scipy.optimize import minimize
+import json
 
 # EPS to prevent numerical issue in closed form ridge regression solver
 EPS = 1e-10
@@ -75,7 +80,21 @@ parser.add_argument("--exit_after_collect_metric", action="store_true", help="if
 parser.add_argument("--n_ensemble_nystrom", type=int, default=1, help="number of learners in ensembled nystrom")
 args = parser.parse_args()
 
-
+def record_run_attributes(args, metric_dict_sample_val):
+    metric_dict_sample_val["runtype"] = "kernel-exp"
+    metric_dict_sample_val["evaltype"] = args.save_path.split("/")[-1]
+    metric_dict_sample_val["train-loss"] = train_loss
+    metric_dict_sample_val["eval-acc"] = eval_metric
+    metric_dict_sample_val["cross-entropy"] = monitor_signal
+    metric_dict_sample_val["seed"] = args.random_seed
+    metric_dict_sample_val["l2-reg"] = args.l2_reg
+    metric_dict_sample_val["kernel-sigmal"] = args.kernel_sigma
+    metric_dict_sample_val["n-feat"] = args.n_feat
+    metric_dict_sample_val["n-bit-feat"] = args.n_bit_feat
+    metric_dict_sample_val["n-epoch"] = args.epoch
+    metric_dict_sample_val["n-sample"] = args.n_sample
+    metric_dict_sample_val["approx-type"] = args.approx_type
+    return metric_dict_sample_val
 
 if __name__ == "__main__":
     np.random.seed(args.random_seed)
@@ -254,7 +273,7 @@ if __name__ == "__main__":
 
     # collect metrics
     if args.collect_sample_metrics:
-        print("start doing sample metric collection with ", X_train.size(0), " training samples")
+        print("start doing sample metric collection with ", X_val.size(0), " samples")
         if use_cuda:
             metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
                 get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)  
@@ -313,6 +332,14 @@ if __name__ == "__main__":
 
             if not os.path.isdir(args.save_path):
                 os.makedirs(args.save_path)
+
+            # unify all the information into a single json file for covtype experiments
+            if not args.collect_sample_metrics:
+                metric_dict_sample_val = {}
+            metric_dict_sample_val = record_run_attributes(args, metric_dict_sample_val)
+            with open(args.save_path + "/results_final.json", "w") as f:
+                json.dump(metric_dict_sample_val, f)
+
             np.savetxt(args.save_path + "/train_loss.txt", train_loss)
             np.savetxt(args.save_path + "/eval_metric.txt", eval_metric)
             np.savetxt(args.save_path + "/monitor_signal.txt", monitor_signal_history)
@@ -321,3 +348,10 @@ if __name__ == "__main__":
                 early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
                 if early_stop:
                     break
+
+# python run_model.py \
+#   --approx_type=cir_rff --n_feat=5000 --n_bit_feat=8 \
+#   --model=logistic_regression --opt=sgd --minibatch=250 --l2_reg=1e-05  \
+#   --epoch=10 --learning_rate=10 --fixed_epoch_number \
+#   --kernel_sigma=0.9128709291752769 --random_seed=2 \
+#   --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp --n_sample=2000 --cuda

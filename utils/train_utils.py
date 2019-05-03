@@ -4,7 +4,8 @@ import numpy as np
 from copy import deepcopy
 import sys
 sys.path.append("../utils")
-from misc_utils import delta_approximation
+from misc_utils import delta_approximation, eigenspace_overlap
+
 
 def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
     train_loss = []
@@ -41,7 +42,7 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 cost.backward()
                 return cost
             loss = optimizer.step(closure)
-            train_loss.append(loss[0].data.cpu().numpy() )
+            train_loss.append(float(loss[0].data.cpu().numpy()))
         elif (args.opt == "lm_halp_svrg") or (args.opt == "lm_halp_sgd"):
             # We need to add this function to models when we want to use SVRG
             def closure(data=X, target=Y, feat=None):
@@ -78,7 +79,7 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 # extract the data X and grad of the output of 
                 return cost, data, model.output.grad
             loss = optimizer.step(closure)
-            train_loss.append(loss[0].data.cpu().numpy() )
+            train_loss.append(float(loss[0].data.cpu().numpy()))
         else:
             if args.approx_type == "rff" or args.approx_type == "cir_rff":
                 X = kernel.get_cos_feat(X)
@@ -92,7 +93,7 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
             X = Variable(X, requires_grad=False)
             Y = Variable(Y, requires_grad=False)
             loss = model.forward(X, Y)
-            train_loss.append(loss[0].data.cpu().numpy() )
+            train_loss.append(float(loss[0].data.cpu().numpy()))
             loss.backward()
             optimizer.step()
         # print("epoch ", epoch, "step", i, "loss", loss[0] )
@@ -212,12 +213,15 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
     print("calculation delta with lambda = ", l2_reg)
     delta_right, delta_left = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
        kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
+    overlap_list = eigenspace_overlap(kernel_mat, kernel_mat_approx, kernel_approx.n_feat)
     spectrum = None
     spectrum_exact = None
     metric_dict = {"F_norm_error": float(F_norm_error),
                   "Delta_left": float(delta_left),
                   "Delta_right": float(delta_right),
                   "spectral_norm_error": float(spectral_norm_error) }
+    for i, overlap in enumerate(overlap_list):
+        metric_dict["overlap_{}".format(i)] = overlap_list[i]
     print(metric_dict)
     if is_cuda_tensor:
        kernel.torch(cuda=True)
