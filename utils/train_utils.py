@@ -10,6 +10,9 @@ from misc_utils import delta_approximation, eigenspace_overlap, set_random_seed
 def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
     train_loss = []
     use_cuda = torch.cuda.is_available() and args.cuda
+    # as we fix randomness for evaluation, in each new epoch, we want the randomness
+    # on quantization for training to be different across epochs.
+    set_random_seed(quantizer.rand_seed + epoch)
     for i, minibatch in enumerate(train_loader):
         X, Y = minibatch
         if use_cuda:
