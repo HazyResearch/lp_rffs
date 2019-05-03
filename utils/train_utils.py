@@ -4,7 +4,7 @@ import numpy as np
 from copy import deepcopy
 import sys
 sys.path.append("../utils")
-from misc_utils import delta_approximation, eigenspace_overlap
+from misc_utils import delta_approximation, eigenspace_overlap, set_random_seed
 
 
 def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
@@ -106,6 +106,8 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
     if args.model == "logistic_regression":
         correct_cnt = 0
         cross_entropy_accum = 0.0
+        # we for the quantization random seed to be consistent with metric collection
+        set_random_seed(quantizer.rand_seed)
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
             if use_cuda:
