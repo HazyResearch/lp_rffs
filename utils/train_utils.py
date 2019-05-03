@@ -218,7 +218,9 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
     print("calculation delta with lambda = ", l2_reg)
     delta_right, delta_left = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
        kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
-    overlap_list = eigenspace_overlap(kernel_mat, kernel_mat_approx, kernel_approx.n_feat)
+    overlap_list = eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
+                                      kernel_mat_approx.cpu().numpy().astype(np.float64), 
+                                      kernel_approx.n_feat)
     spectrum = None
     spectrum_exact = None
     metric_dict = {"F_norm_error": float(F_norm_error),

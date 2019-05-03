@@ -48,11 +48,15 @@ def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=[1000, 2500, 5
     # here K is the exact kernel while K_tilde is the approximated kernel
     # K_tilde_feat_dim specifies
     # ref_dim_list specifies the number of left singular vectors we consider for kernel K and K-tilde
+    assert np.allclose(K, K.T) and np.allclose(K_tilde, K_tilde.T), "Kernel matrix must be symmetric"    
     sigma, U = np.linalg.eigh(K)
     sigma_tilde, U_tilde = np.linalg.eigh(K_tilde)
+    # reverse the column order to pop top eigen vectors to the front
+    U = U[:, ::-1]
+    U_tilde = U_tilde[:, ::-1]
     overlap_list = []
     for ref_dim in ref_dim_list:
-        overlap = np.linalg.norm(U_tilde[:, :K_tilde_feat_dim].T @ U[:, :ref_dim])**2 / float(ref_dim)
+        overlap = np.linalg.norm(U_tilde[:, :int(K_tilde_feat_dim)].T @ U[:, :int(ref_dim)])**2 / float(ref_dim)
         overlap_list.append(overlap)
     return overlap_list
 
