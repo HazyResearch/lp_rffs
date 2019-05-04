@@ -39,7 +39,7 @@ from scipy.optimize import minimize
 import json
 import smallfry
 import smallfry.utils
-
+import time
 # EPS to prevent numerical issue in closed form ridge regression solver
 EPS = 1e-10
 
@@ -99,9 +99,16 @@ def record_run_attributes(args, metric_dict_sample_val):
     metric_dict_sample_val["approx-type"] = args.approx_type
     metric_dict_sample_val['git-commit'] = git_commit
     metric_dict_sample_val['git-diff'] = git_diff
+    metric_dict_sample_val['elapsed'] = elapsed
     return metric_dict_sample_val
 
 if __name__ == "__main__":
+    if not os.path.isdir(args.save_path):
+        os.makedirs(args.save_path)
+    log_file = open(args.save_path + "/run.log", "w")
+    sys.stdout = log_file
+    sys.stderr = log_file
+    start_time = time.time()
     git_commit, git_diff = smallfry.utils.get_git_hash_and_diff(smallfry.utils.get_git_dir(), debug=args.debug)
     np.random.seed(args.random_seed)
     use_cuda = torch.cuda.is_available() and args.cuda
@@ -342,6 +349,9 @@ if __name__ == "__main__":
             # unify all the information into a single json file for covtype experiments
             if not args.collect_sample_metrics:
                 metric_dict_sample_val = {}
+            end_time = time.time()
+            elapsed = end_time - start_time
+            print("run time (s) ", elapsed)
             metric_dict_sample_val = record_run_attributes(args, metric_dict_sample_val)
             with open(args.save_path + "/results_final.json", "w") as f:
                 json.dump(metric_dict_sample_val, f)
