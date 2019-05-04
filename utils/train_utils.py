@@ -12,7 +12,8 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
     use_cuda = torch.cuda.is_available() and args.cuda
     # as we fix randomness for evaluation, in each new epoch, we want the randomness
     # on quantization for training to be different across epochs.
-    set_random_seed(quantizer.rand_seed + epoch)
+    if quantizer is not None:
+        set_random_seed(quantizer.rand_seed + epoch)
     for i, minibatch in enumerate(train_loader):
         X, Y = minibatch
         if use_cuda:
@@ -110,7 +111,8 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
         correct_cnt = 0
         cross_entropy_accum = 0.0
         # we for the quantization random seed to be consistent with metric collection
-        set_random_seed(quantizer.rand_seed)
+        if quantizer is not None:
+            set_random_seed(quantizer.rand_seed)
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
             if use_cuda:

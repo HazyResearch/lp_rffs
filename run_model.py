@@ -82,10 +82,10 @@ args = parser.parse_args()
 
 def record_run_attributes(args, metric_dict_sample_val):
     metric_dict_sample_val["runtype"] = "kernel-exp"
-    metric_dict_sample_val["evaltype"] = args.save_path.split("/")[-1]
-    metric_dict_sample_val["train-loss"] = train_loss
+    metric_dict_sample_val["evaltype"] = args.data_path.split("/")[-1]
+    #metric_dict_sample_val["train-loss"] = train_loss
     metric_dict_sample_val["eval-acc"] = eval_metric
-    metric_dict_sample_val["cross-entropy"] = monitor_signal
+    metric_dict_sample_val["cross-entropy"] = monitor_signal_history
     metric_dict_sample_val["seed"] = args.random_seed
     metric_dict_sample_val["l2-reg"] = args.l2_reg
     metric_dict_sample_val["kernel-sigmal"] = args.kernel_sigma
