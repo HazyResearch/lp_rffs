@@ -37,6 +37,7 @@ from train_utils import get_sample_kernel_metrics, get_sample_kernel_F_norm, sam
 from misc_utils import expected_loss
 from scipy.optimize import minimize
 import json
+import smallfry
 
 # EPS to prevent numerical issue in closed form ridge regression solver
 EPS = 1e-10
@@ -97,6 +98,7 @@ def record_run_attributes(args, metric_dict_sample_val):
     return metric_dict_sample_val
 
 if __name__ == "__main__":
+    git_commit, git_diff = smallfry.utils.get_git_hash_and_diff(smallfry.utils.get_git_dir())
     np.random.seed(args.random_seed)
     use_cuda = torch.cuda.is_available() and args.cuda
     torch.manual_seed(args.random_seed)
