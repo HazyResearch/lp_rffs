@@ -38,6 +38,7 @@ from misc_utils import expected_loss
 from scipy.optimize import minimize
 import json
 import smallfry
+import smallfry.utils
 
 # EPS to prevent numerical issue in closed form ridge regression solver
 EPS = 1e-10
@@ -79,6 +80,7 @@ parser.add_argument("--fixed_epoch_number", action="store_true", help="if the fl
 parser.add_argument("--exit_after_collect_metric", action="store_true", help="if the flag is used, \
     we only do metric collection on kernel matrix without doing trainining")
 parser.add_argument("--n_ensemble_nystrom", type=int, default=1, help="number of learners in ensembled nystrom")
+parser.add_argument("--debug", action="store_true", help="do debug runs with uncommit git edits")
 args = parser.parse_args()
 
 def record_run_attributes(args, metric_dict_sample_val):
@@ -95,10 +97,12 @@ def record_run_attributes(args, metric_dict_sample_val):
     metric_dict_sample_val["n-epoch"] = args.epoch
     metric_dict_sample_val["n-sample"] = args.n_sample
     metric_dict_sample_val["approx-type"] = args.approx_type
+    metric_dict_sample_val['git-commit'] = git_commit
+    metric_dict_sample_val['git-diff'] = git_diff
     return metric_dict_sample_val
 
 if __name__ == "__main__":
-    git_commit, git_diff = smallfry.utils.get_git_hash_and_diff(smallfry.utils.get_git_dir())
+    git_commit, git_diff = smallfry.utils.get_git_hash_and_diff(smallfry.utils.get_git_dir(), debug=args.debug)
     np.random.seed(args.random_seed)
     use_cuda = torch.cuda.is_available() and args.cuda
     torch.manual_seed(args.random_seed)
