@@ -218,8 +218,9 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
     # spectrum = get_matrix_spectrum(kernel_mat_approx)
     # spectrum_exact = get_matrix_spectrum(kernel_mat)
     print("calculation delta with lambda = ", l2_reg)
-    delta_right, delta_left = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
-       kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
+    delta_right, delta_left = 0.0, 0.0
+    # delta_right, delta_left = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
+    #    kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
     overlap_list = eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
                                       kernel_mat_approx.cpu().numpy().astype(np.float64), 
                                       kernel_approx.n_feat)
@@ -230,7 +231,10 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
                   "Delta_right": float(delta_right),
                   "spectral_norm_error": float(spectral_norm_error) }
     for i, overlap in enumerate(overlap_list):
-        metric_dict["overlap_{}".format(i)] = overlap_list[i]
+        # We additionally collect overlap with smaller dimensionalities
+        # we need to distinguish the overlap index with the previously collected ones
+        metric_dict["overlap_{}".format(i - 10)] = overlap_list[i]
+        # metric_dict["overlap_{}".format(i)] = overlap_list[i]
     print(metric_dict)
     if is_cuda_tensor:
        kernel.torch(cuda=True)

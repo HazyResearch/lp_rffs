@@ -43,8 +43,8 @@ def delta_approximation(K, K_tilde, lambda_=1e-3):
     return lambda_max, -lambda_min
 
 # get eigenspace overlap 
-def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=[1000, 2500, 5000, 10000, 20000]):
-    # ref_dim_list=[1000, 2500, ]):
+def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, #ref_dim_list=[1000, 2500, 5000, 10000, 20000]):
+    ref_dim_list=[1, 2, 4, 8, 16, 32, 64, 128, 256, 512]):
     # here K is the exact kernel while K_tilde is the approximated kernel
     # K_tilde_feat_dim specifies
     # ref_dim_list specifies the number of left singular vectors we consider for kernel K and K-tilde
