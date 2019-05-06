@@ -200,7 +200,7 @@ def get_matrix_spectrum(X):
 #####################################################################
 # function to calculate Delta
 #####################################################################
-def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
+def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg, y_label=None):
     # X = sample_data(X_all, n_sample)
     is_cuda_tensor = X.is_cuda
     if is_cuda_tensor:
@@ -218,12 +218,13 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
     # spectrum = get_matrix_spectrum(kernel_mat_approx)
     # spectrum_exact = get_matrix_spectrum(kernel_mat)
     print("calculation delta with lambda = ", l2_reg)
-    delta_right, delta_left = 0.0, 0.0
-    # delta_right, delta_left = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
-    #    kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
-    overlap_list = eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
+    #delta_right, delta_left = 0.0, 0.0
+    delta_right, delta_left = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
+        kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
+    # we also collect weighted overlap and the strength of labels on different eigen directions of the exact kernel
+    overlap_list, weighted_overlap_list, y_strength = eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
                                       kernel_mat_approx.cpu().numpy().astype(np.float64), 
-                                      kernel_approx.n_feat)
+                                      kernel_approx.n_feat, y_label)
     spectrum = None
     spectrum_exact = None
     metric_dict = {"F_norm_error": float(F_norm_error),
@@ -231,10 +232,13 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
                   "Delta_right": float(delta_right),
                   "spectral_norm_error": float(spectral_norm_error) }
     for i, overlap in enumerate(overlap_list):
-        # We additionally collect overlap with smaller dimensionalities
-        # we need to distinguish the overlap index with the previously collected ones
-        metric_dict["overlap_{}".format(i - 10)] = overlap_list[i]
-        # metric_dict["overlap_{}".format(i)] = overlap_list[i]
+        metric_dict["overlap_{}".format(i)] = overlap_list[i]
+    if weighted_overlap_list is not None:
+        for i, weighted_overlap in enumerate(weighted_overlap_list):
+            metric_dict["weighted_overlap_{}".format(i)] = weighted_overlap_list[i]
+    if y_strength is not None:
+        metric_dict["y_strength"] = y_strength
+
     print(metric_dict)
     if is_cuda_tensor:
        kernel.torch(cuda=True)

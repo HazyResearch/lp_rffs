@@ -288,11 +288,19 @@ if __name__ == "__main__":
     if args.collect_sample_metrics:
         print("start doing sample metric collection with ", X_val.size(0), " samples")
         if use_cuda:
-            metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)  
+            if args.model == 'logistic_regression':
+                metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+                    get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)  
+            elif args.model == 'ridge_regression':
+                metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+                    get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg, Y_val)  
         else:
-            metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg) 
+            if args.model == 'logistic_regression':
+                metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+                    get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg) 
+            elif args.model == 'ridge_regression':
+                metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+                    get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg, Y_val) 
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
         with open(args.save_path + "/metric_sample_eval.json", "wb") as f:
