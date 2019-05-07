@@ -223,9 +223,10 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg, y_lab
         kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
     # we also collect weighted overlap and the strength of labels on different eigen directions of the exact kernel
     print("computing overlap")
-    overlap_list, weighted_overlap_list, y_strength = eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
-                                      kernel_mat_approx.cpu().numpy().astype(np.float64), 
-                                      kernel_approx.n_feat, y_label=y_label.cpu().numpy().astype(np.float64))
+    overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, y_strength, y_strength_smooth = \
+        eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
+                           kernel_mat_approx.cpu().numpy().astype(np.float64), 
+                           kernel_approx.n_feat, y_label=y_label.cpu().numpy().astype(np.float64))
     print("computing overlap finished.")
     spectrum = None
     spectrum_exact = None
@@ -238,8 +239,13 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg, y_lab
     if weighted_overlap_list is not None:
         for i, weighted_overlap in enumerate(weighted_overlap_list):
             metric_dict["weighted_overlap_{}".format(i)] = weighted_overlap_list[i]
+    if smoothed_weighted_overlap_list is not None:
+        for i, smoothed_weighted_overlap in enumerate(smoothed_weighted_overlap_list):
+            metric_dict["smoothed_weighted_overlap_{}".format(i)] = smoothed_weighted_overlap_list[i]
     if y_strength is not None:
         metric_dict["y_strength"] = y_strength
+    if y_strength_smooth is not None:
+        metric_dict['y_strength_smooth'] = y_strength_smooth
 
     print(metric_dict)
     if is_cuda_tensor:

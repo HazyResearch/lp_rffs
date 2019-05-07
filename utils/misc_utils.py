@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize
 import torch
+from sklearn.isotonic import IsotonicRegression
 
 # for numerical protection
 EPS = 1e-20
@@ -66,17 +67,24 @@ def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=
     # print(U_tilde)
     if y_label is not None:
         # we record the strength of label vector on different eigen vector directions 
-        strength = (U.T @ y_label.reshape((y_label.size, 1)))**2
+        strength = np.abs(U.T @ y_label.reshape((y_label.size, 1)))
         strength = strength.reshape((strength.size, ))
+        ir = IsotonicRegression(increasing=False)
+        smoothed_strength = ir.fit_transform(np.arange(strength.size), strength)
         # we also collect the weighted overlap values
         weighted_overlap_list = []
         for ref_dim in ref_dim_list:
             weighted_overlap = np.linalg.norm(U_tilde[:, :int(K_tilde_feat_dim)].T @ U[:, :int(ref_dim)] @ np.diag(strength[:int(ref_dim)]))**2 / float(ref_dim)
             weighted_overlap_list.append(weighted_overlap)
+        smoothed_weighted_overlap_list = []
+        for ref_dim in ref_dim_list:
+            smoothed_weighted_overlap = np.linalg.norm(U_tilde[:, :int(K_tilde_feat_dim)].T @ U[:, :int(ref_dim)] @ np.diag(smoothed_strength[:int(ref_dim)]))**2 / float(ref_dim)
+            smoothed_weighted_overlap_list.append(smoothed_weighted_overlap)
     else:
         strength = None
         weighted_overlap_list = None
-    return overlap_list, weighted_overlap_list, strength.tolist()
+        smoothed_weighted_overlap_list = None
+    return overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, strength.tolist(), smoothed_strength.tolist()
 
 
 class Args(object):
