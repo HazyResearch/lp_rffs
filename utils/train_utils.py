@@ -222,9 +222,11 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg, y_lab
     delta_right, delta_left = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
         kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
     # we also collect weighted overlap and the strength of labels on different eigen directions of the exact kernel
+    print("computing overlap")
     overlap_list, weighted_overlap_list, y_strength = eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
                                       kernel_mat_approx.cpu().numpy().astype(np.float64), 
-                                      kernel_approx.n_feat, y_label)
+                                      kernel_approx.n_feat, y_label=y_label.cpu().numpy().astype(np.float64))
+    print("computing overlap finished.")
     spectrum = None
     spectrum_exact = None
     metric_dict = {"F_norm_error": float(F_norm_error),
@@ -243,6 +245,7 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg, y_lab
     if is_cuda_tensor:
        kernel.torch(cuda=True)
        kernel_approx.torch(cuda=True)
+    print("sample metric collection done!")
     return metric_dict, spectrum, spectrum_exact
 
 

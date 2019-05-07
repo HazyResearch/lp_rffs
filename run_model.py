@@ -87,8 +87,13 @@ def record_run_attributes(args, metric_dict_sample_val):
     metric_dict_sample_val["runtype"] = "kernel-exp"
     metric_dict_sample_val["evaltype"] = args.data_path.split("/")[-1]
     #metric_dict_sample_val["train-loss"] = train_loss
-    metric_dict_sample_val["eval-acc"] = eval_metric
-    metric_dict_sample_val["cross-entropy"] = monitor_signal_history
+    if args.model == 'logistic_regression':
+        metric_dict_sample_val["eval-acc"] = eval_metric
+        metric_dict_sample_val["cross-entropy"] = monitor_signal_history
+    elif args.model == 'ridge_regression':
+        metric_dict_sample_val["train-loss"] = float(train_error)
+        metric_dict_sample_val["test-loss"] = float(test_error)
+        metric_dict_sample_val["y-norm"] = float(torch.norm(Y_val))
     metric_dict_sample_val["seed"] = args.random_seed
     metric_dict_sample_val["l2-reg"] = args.l2_reg
     metric_dict_sample_val["kernel-sigmal"] = args.kernel_sigma
@@ -109,7 +114,11 @@ if __name__ == "__main__":
     sys.stdout = log_file
     sys.stderr = log_file
     start_time = time.time()
-    git_commit, git_diff = smallfry.utils.get_git_hash_and_diff(smallfry.utils.get_git_dir(), debug=args.debug)
+
+    if not args.debug:
+        git_commit, git_diff = smallfry.utils.get_git_hash_and_diff(smallfry.utils.get_git_dir(), debug=args.debug)
+    else:
+        git_commit, git_diff = 0.0, 0.0
     np.random.seed(args.random_seed)
     use_cuda = torch.cuda.is_available() and args.cuda
     torch.manual_seed(args.random_seed)
@@ -125,7 +134,6 @@ if __name__ == "__main__":
         Y_val = Y_train.copy()
         Y_train += np.random.normal(scale=args.fixed_design_noise_sigma, size=Y_train.shape)
         Y_val += np.random.normal(scale=args.fixed_design_noise_sigma, size=Y_train.shape)
-
     if args.n_sample > 0:
         # downsample if specified
         X_train, Y_train = sample_data(X_train, Y_train, args.n_sample)
@@ -293,14 +301,14 @@ if __name__ == "__main__":
                     get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)  
             elif args.model == 'ridge_regression':
                 metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                    get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg, Y_val)  
+                    get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg, Y_val.cuda() / torch.norm(Y_val.cuda()))  
         else:
             if args.model == 'logistic_regression':
                 metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
                     get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg) 
             elif args.model == 'ridge_regression':
                 metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                    get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg, Y_val) 
+                    get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg, Y_val / torch.norm(Y_val)) 
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
         with open(args.save_path + "/metric_sample_eval.json", "wb") as f:
@@ -328,6 +336,17 @@ if __name__ == "__main__":
         print("test error ", test_error)
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
+
+        # unify all the information into a single json file for covtype experiments
+        if not args.collect_sample_metrics:
+            metric_dict_sample_val = {}
+        end_time = time.time()
+        elapsed = end_time - start_time
+        print("run time (s) ", elapsed)
+        metric_dict_sample_val = record_run_attributes(args, metric_dict_sample_val)
+        with open(args.save_path + "/results_final.json", "w") as f:
+            json.dump(metric_dict_sample_val, f)
+
         np.savetxt(args.save_path + "/train_loss.txt", np.array(train_error).reshape( (1, ) ) )
         np.savetxt(args.save_path + "/eval_metric.txt", np.array(test_error).reshape( (1, ) ) )
         np.savetxt(args.save_path + "/lambda.txt", np.array(args.l2_reg).reshape( (1, ) ) )
@@ -372,6 +391,20 @@ if __name__ == "__main__":
                 early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
                 if early_stop:
                     break
+
+# python -u third_party/lp_rffs/run_model.py \
+#   --approx_type=cir_rff --n_feat=5000 --n_bit_feat=8 \
+#   --model=ridge_regression --closed_form_sol \
+#   --l2_reg=0.0005 --kernel_sigma=28.867513459481287 --random_seed=2 \
+#   --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census \
+#   --save_path=./tmp/census --collect_sample_metrics --debug
+
+# python -u third_party/lp_rffs/run_model.py \
+#   --approx_type=cir_rff --n_feat=5000 --do_fp_feat \
+#   --model=ridge_regression --closed_form_sol \
+#   --l2_reg=0.0005 --kernel_sigma=28.867513459481287 --random_seed=2 \
+#   --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census \
+#   --save_path=./tmp/census --collect_sample_metrics --debug
 
 # python run_model.py \
 #   --approx_type=cir_rff --n_feat=5000 --n_bit_feat=8 \

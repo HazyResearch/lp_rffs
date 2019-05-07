@@ -44,9 +44,9 @@ def delta_approximation(K, K_tilde, lambda_=1e-3):
 
 # get eigenspace overlap 
 def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=None):
-    if y_label is not None:
+    if ref_dim_list is None and y_label is not None:
         ref_dim_list = [1,2,4,8,16,32,64,128,256,512,1024,2000]
-    else:
+    elif ref_dim_list is None:
         ref_dim_list = [1,2,4,8,16,32,64,128,256,512,1000,2500,5000,10000,20000]
     # here K is the exact kernel while K_tilde is the approximated kernel
     # K_tilde_feat_dim specifies
@@ -58,13 +58,16 @@ def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=
     U = U[:, ::-1]
     U_tilde = U_tilde[:, ::-1]
     overlap_list = []
+
     for ref_dim in ref_dim_list:
         overlap = np.linalg.norm(U_tilde[:, :int(K_tilde_feat_dim)].T @ U[:, :int(ref_dim)])**2 / float(ref_dim)
         overlap_list.append(overlap)
-
+    # print(U)
+    # print(U_tilde)
     if y_label is not None:
         # we record the strength of label vector on different eigen vector directions 
         strength = (U.T @ y_label.reshape((y_label.size, 1)))**2
+        strength = strength.reshape((strength.size, ))
         # we also collect the weighted overlap values
         weighted_overlap_list = []
         for ref_dim in ref_dim_list:
@@ -73,7 +76,7 @@ def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=
     else:
         strength = None
         weighted_overlap_list = None
-    return overlap_list
+    return overlap_list, weighted_overlap_list, strength.tolist()
 
 
 class Args(object):
