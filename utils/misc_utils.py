@@ -44,7 +44,7 @@ def delta_approximation(K, K_tilde, lambda_=1e-3):
     return lambda_max, -lambda_min
 
 # get eigenspace overlap 
-def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=None):
+def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=None, power_alpha=[1,2,3,4,5,6,7]):
     if ref_dim_list is None and y_label is not None:
         ref_dim_list = [1,2,4,8,16,32,64,128,256,512,1024,2000]
     elif ref_dim_list is None:
@@ -59,10 +59,16 @@ def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=
     U = U[:, ::-1]
     U_tilde = U_tilde[:, ::-1]
     overlap_list = []
+    eig_weighted_overlap_dict = {}
 
     for ref_dim in ref_dim_list:
         overlap = np.linalg.norm(U_tilde[:, :int(K_tilde_feat_dim)].T @ U[:, :int(ref_dim)])**2 / float(ref_dim)
         overlap_list.append(overlap)
+    for power_alpha in [1,2,3,4,5,6,7]:
+        eig_weighted_overlap_list[power_alpha] = []
+        for ref_dim in ref_dim_list:
+            eig_weighted_overlap = np.linalg.norm(U_tilde[:, :int(K_tilde_feat_dim)].T @ U[:, :int(ref_dim)] @ np.diag(sigma[:int(ref_dim)]))**2 / float(ref_dim)
+            eig_weighted_overlap_list[power_alpha].append(eig_weighted_overlap)
     # print(U)
     # print(U_tilde)
     if y_label is not None:
@@ -84,7 +90,7 @@ def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=
         strength = None
         weighted_overlap_list = None
         smoothed_weighted_overlap_list = None
-    return overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, strength.tolist(), smoothed_strength.tolist()
+    return overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, strength.tolist(), smoothed_strength.tolist(), eig_weighted_overlap_list
 
 
 class Args(object):

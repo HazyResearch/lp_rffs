@@ -223,7 +223,8 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg, y_lab
         kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
     # we also collect weighted overlap and the strength of labels on different eigen directions of the exact kernel
     print("computing overlap")
-    overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, y_strength, y_strength_smooth = \
+    overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, \
+    y_strength, y_strength_smooth, eig_weighted_overlap_list = \
         eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
                            kernel_mat_approx.cpu().numpy().astype(np.float64), 
                            kernel_approx.n_feat, y_label=y_label.cpu().numpy().astype(np.float64))
@@ -236,6 +237,9 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg, y_lab
                   "spectral_norm_error": float(spectral_norm_error) }
     for i, overlap in enumerate(overlap_list):
         metric_dict["overlap_{}".format(i)] = overlap_list[i]
+    for power in eig_weighted_overlap_list.keys():
+        for i, overlap in enumerate(eig_weighted_overlap_list[power]):
+            metric_dict["eig_weighted_overlap_power_{}_{}".format(power, i)] = overlap
     if weighted_overlap_list is not None:
         for i, weighted_overlap in enumerate(weighted_overlap_list):
             metric_dict["weighted_overlap_{}".format(i)] = weighted_overlap_list[i]
