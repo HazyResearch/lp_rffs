@@ -67,7 +67,8 @@ def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=
     for power_alpha in [1,2,3,4,5,6,7]:
         eig_weighted_overlap_dict[power_alpha] = []
         for ref_dim in ref_dim_list:
-            eig_weighted_overlap = np.linalg.norm(U_tilde[:, :int(K_tilde_feat_dim)].T @ U[:, :int(ref_dim)] @ np.diag(sigma[:int(ref_dim)]))**2 / float(ref_dim)
+            eig_weighted_overlap = np.linalg.norm(U_tilde[:, :int(K_tilde_feat_dim)].T @ U[:, :int(ref_dim)] @ (np.diag(sigma[:int(ref_dim)]))**(float(power_alpha)/2.0))**2 / float(np.sum(sigma[:int(ref_dim)]))
+            # print("test ", power_alpha, ref_dim, eig_weighted_overlap)
             eig_weighted_overlap_dict[power_alpha].append(eig_weighted_overlap)
     # print(U)
     # print(U_tilde)
