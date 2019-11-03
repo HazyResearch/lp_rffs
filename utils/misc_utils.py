@@ -87,11 +87,13 @@ def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=
         for ref_dim in ref_dim_list:
             smoothed_weighted_overlap = np.linalg.norm(U_tilde[:, :int(K_tilde_feat_dim)].T @ U[:, :int(ref_dim)] @ np.diag(smoothed_strength[:int(ref_dim)]))**2 / float(ref_dim)
             smoothed_weighted_overlap_list.append(smoothed_weighted_overlap)
+        return overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, strength.tolist(), smoothed_strength.tolist(), eig_weighted_overlap_dict
     else:
         strength = None
         weighted_overlap_list = None
         smoothed_weighted_overlap_list = None
-    return overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, strength.tolist(), smoothed_strength.tolist(), eig_weighted_overlap_dict
+        smoothed_strength = None
+        return overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, strength, smoothed_strength, eig_weighted_overlap_dict
 
 
 class Args(object):

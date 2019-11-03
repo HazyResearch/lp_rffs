@@ -223,11 +223,18 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg, y_lab
         kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
     # we also collect weighted overlap and the strength of labels on different eigen directions of the exact kernel
     print("computing overlap")
-    overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, \
-    y_strength, y_strength_smooth, eig_weighted_overlap_list = \
-        eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
+    if y_label is not None:
+        overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, \
+        y_strength, y_strength_smooth, eig_weighted_overlap_list = \
+            eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64), 
                            kernel_mat_approx.cpu().numpy().astype(np.float64), 
                            kernel_approx.n_feat, y_label=y_label.cpu().numpy().astype(np.float64))
+    else:
+        overlap_list, weighted_overlap_list, smoothed_weighted_overlap_list, \
+        y_strength, y_strength_smooth, eig_weighted_overlap_list = \
+            eigenspace_overlap(kernel_mat.cpu().numpy().astype(np.float64),
+                           kernel_mat_approx.cpu().numpy().astype(np.float64),
+                           kernel_approx.n_feat)
     print("computing overlap finished.")
     spectrum = None
     spectrum_exact = None
