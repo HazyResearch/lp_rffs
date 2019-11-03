@@ -44,7 +44,7 @@ def delta_approximation(K, K_tilde, lambda_=1e-3):
     return lambda_max, -lambda_min
 
 # get eigenspace overlap 
-def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=None, power_alphas=[1,2,3,4,5,6,7]):
+def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=None, power_alphas=[0,0.5,1,2,3,4,5,6,7]):
     if ref_dim_list is None and y_label is not None:
         ref_dim_list = [1,2,4,8,16,32,64,128,256,512,1024,2000]
     elif ref_dim_list is None:
