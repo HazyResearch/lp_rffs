@@ -45,7 +45,27 @@ def delta_approximation(K, K_tilde, lambda_=1e-3):
 
 # test the following eigenspace overlap function
 def test_eigenspace_overlap():
-    pass
+    U_tilde = np.array([[0,1], [1,0], [1,0], [0, 1]]) / np.sqrt(2)
+    U = np.array([[1,0], [1,0], [0, 1], [0, 1]]) / np.sqrt(2)
+    ref_dim_list = [1, 2] 
+    power_alpha = 4
+    # we assume sigma is the eigen values of the kernel matrix
+    sigma = np.array([1,2])
+    sigma_tilde = np.array([3,4])
+    K = U @ np.diag(sigma) @ U.T
+    K_tilde = U_tilde @ np.diag(sigma_tilde) @ U_tilde.T
+    _, _, _, _, _, eig_weighted_overlap_dict = eigenspace_overlap(K, K_tilde, K_tilde_feat_dim=2, ref_dim_list=ref_dim_list, power_alphas=[0, 4])
+    assert np.abs(eig_weighted_overlap_dict[0][0] - 0.5) < 1e-6 
+    assert np.abs(eig_weighted_overlap_dict[0][1] - 0.5) < 1e-6
+    assert np.abs(eig_weighted_overlap_dict[4][0] - 0.5) < 1e-6
+    assert np.abs(eig_weighted_overlap_dict[4][1] - 0.5) < 1e-6    
+    #test = np.linalg.norm(U_tilde[:, :int(ref_dim)].T @ U[:, :int(ref_dim)] @ (np.diag(sigma[:int(ref_dim)]))**(float(power_alpha)/2.0))**2 / float(np.sum(sigma[:int(ref_dim)]**(float(power_alpha))))
+#    print(test)
+#    print(U_tilde[:, :int(ref_dim)].T)
+#    print(U[:, :int(ref_dim)])
+#    print((np.diag(sigma[:int(ref_dim)]))**(float(power_alpha)/2.0))
+#    print(float(np.sum(sigma[:int(ref_dim)])))
+#    print(U[:, :int(ref_dim)] @ (np.diag(sigma[:int(ref_dim)]))**(float(power_alpha)/2.0))
 
 # get eigenspace overlap 
 def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=None, power_alphas=[0,0.1,0.25,0.5,1,2,3,4,5,6,7]):
@@ -116,3 +136,6 @@ class Args(object):
         self.data_path = data_path
         self.do_fp = do_fp
         self.test_var_reduce = test_var_reduce
+
+if __name__ == "__main__":
+    test_eigenspace_overlap()
