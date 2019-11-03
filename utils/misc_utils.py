@@ -58,6 +58,8 @@ def eigenspace_overlap(K, K_tilde, K_tilde_feat_dim, ref_dim_list=None, y_label=
     # reverse the column order to pop top eigen vectors to the front
     U = U[:, ::-1]
     U_tilde = U_tilde[:, ::-1]
+    sigma = sigma[::-1]
+    sigma_tilde = sigma_tilde[::-1]
     overlap_list = []
     eig_weighted_overlap_dict = {}
 
